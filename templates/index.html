@@ -7,6 +7,21 @@
     <style>
         body { font-family: Arial, sans-serif; }
         #result img { max-width: 100%; }
+        #uploadedImage { margin-top: 20px; }
+        #loading { display: none; }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-top: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -15,6 +30,10 @@
         <input type="file" id="imageInput" accept="image/*" required />
         <button type="submit">Upload</button>
     </form>
+    <div id="uploadedImage">
+        <!-- Uploaded image will be shown here -->
+    </div>
+    <div id="loading" class="spinner"></div>
     <div id="result">
         <!-- Detection results will be shown here -->
     </div>
@@ -26,12 +45,26 @@
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
 
+            // Display the uploaded image
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                document.getElementById('uploadedImage').innerHTML = `<img src="${event.target.result}" alt="Uploaded Image" />`;
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+
+            // Show loading indicator
+            document.getElementById('loading').style.display = 'block';
+
+            // Send the image to the server
             const response = await fetch('/upload', {
                 method: 'POST',
                 body: formData,
             });
 
             const result = await response.json();
+
+            // Hide loading indicator
+            document.getElementById('loading').style.display = 'none';
 
             if (result.error) {
                 document.getElementById('result').innerText = result.error;
