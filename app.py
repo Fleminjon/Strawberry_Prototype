@@ -7,7 +7,7 @@ app = Flask(__name__, template_folder='templates')
 ROBOFLOW_API_KEY = "2sOXJ2RaKgxTqgTrpgWB"
 ROBOFLOW_MODEL = "strawberry-leaf-disease-jxu2"
 ROBOFLOW_VERSION = "v2"
-ROBOFLOW_API_URL = "https://universe.roboflow.com/strawberry-leaf-disease/strawberry-leaf-disease-jxu2t"
+ROBOFLOW_API_URL = f"https://detect.roboflow.com/{ROBOFLOW_MODEL}/{ROBOFLOW_VERSION}"
 
 @app.route('/')
 def index():
