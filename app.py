@@ -1,13 +1,15 @@
 from flask import Flask, request, jsonify, render_template
-import requests
+from inference_sdk import InferenceHTTPClient
 
 app = Flask(__name__, template_folder='templates')
 
-# Replace with your actual Roboflow API details
-ROBOFLOW_API_KEY = "2sOXJ2RaKgxTqgTrpgWB"
-ROBOFLOW_MODEL = "strawberry-leaf-disease-jxu2"
-ROBOFLOW_VERSION = "v2"
-ROBOFLOW_API_URL = f"https://detect.roboflow.com/{ROBOFLOW_MODEL}/{ROBOFLOW_VERSION}"
+# Initialize the Roboflow inference client
+CLIENT = InferenceHTTPClient(
+    api_url="https://detect.roboflow.com",
+    api_key="2sOXJ2RaKgxTqgTrpgWB"
+)
+
+MODEL_ID = "strawberry-leaf-disease-jxu2t/2"
 
 @app.route('/')
 def index():
@@ -16,20 +18,16 @@ def index():
 @app.route('/upload', methods=['POST'])
 def upload_image():
     image = request.files['file']
-
-    # Send image to Roboflow API
-    response = requests.post(
-        ROBOFLOW_API_URL,
-        files={"file": image},
-        params={"api_key": ROBOFLOW_API_KEY}
-    )
     
-    # Process the response
-    if response.status_code == 500:
-        result = response.json()
-        return jsonify(result)
-    else:
-        return jsonify({"error": "Failed to get a response from Roboflow."}), 500
+    # Save the uploaded image temporarily
+    image_path = "uploaded_image.jpg"
+    image.save(image_path)
+
+    # Perform inference using Roboflow Inference SDK
+    result = CLIENT.infer(image_path, model_id=MODEL_ID)
+    
+    # Process the result
+    return jsonify(result)
 
 if __name__ == '__main__':
     app.run(debug=True)
